@@ -1,0 +1,24 @@
+#!/bin/bash
+
+SSH_HOST=host@example.com
+PORT=1234
+
+NEEDS_TO_START=1
+
+if [ -f /tmp/sshpid ]; then
+	if [ $(pgrep -F /tmp/sshpid | wc -l) -gt 0 ]; then
+		echo 'is running'
+		NEEDS_TO_START=0
+	else
+		echo 'needs to restart'
+		NEEDS_TO_START=1
+	fi
+else
+	echo 'no file'
+fi
+
+if [ $NEEDS_TO_START -gt 0 ]; then
+	echo 'starting'
+	eval "ssh -o ExitOnForwardFailure=yes -N -R ${PORT}:localhost:22 ${SSH_HOST} &"
+	echo $! > /tmp/sshpid
+fi
